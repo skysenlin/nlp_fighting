@@ -1,0 +1,70 @@
+import re
+from string import punctuation
+    
+# 定义要删除的标点等字符
+add_punc='，。、【 】 “”：；（）《》‘’{}？！⑦()、%^>℃：.”“^-——=&#@￥'
+all_punc=punctuation+add_punc
+
+#后向最大匹配
+class IMM(object):
+    def __init__(self, dic_path):
+        """
+        Parameters
+        ----------
+        dic_path : 存放字典位置
+        -------
+        将字典文件中的词读入dictionary.
+
+        """
+        self.dictionary = set()
+        self.maximum = 0
+        #读取词典
+        with open(dic_path, 'r', encoding='utf8') as f:
+            for line in f:
+                line = line.strip()
+                #跳出本次循环，避免空行进入字典
+                if not line:
+                    continue
+                self.dictionary.add(line)
+                if len(line) > self.maximum:
+                    self.maximum = len(line)
+                    
+    def clean(self,text):
+        text_clean=''
+        for i in text:
+            #移除英文和数字
+            i_clean=re.sub(r'[A-Za-z0-9]|/d+','',i)
+            #移除标点符号
+            if i_clean in all_punc:
+                i_clean=''
+            if len(i_clean)>0:
+                text_clean=text_clean+i_clean       
+        return text_clean
+    
+    def cut(self, text):
+        result = []
+        index = len(text)
+        while index > 0:
+            #避免因为某个词在词典中找不到while陷入死循环
+            word = None
+            for size in range(self.maximum, 0, -1):
+                #跳出本次循环，避免因为index - size < 0而导致piece是空值消耗计算
+                if index - size < 0:
+                    continue
+                piece = text[(index - size):index]
+                if piece in self.dictionary:
+                    word = piece
+                    result.append(word)
+                    index -= size
+                    break
+            if word is None:
+                index -= 1
+        return result[::-1]
+
+def main():
+    text = "算法<dsf南京市1长江?.大桥"
+    tokenizer = IMM('./data/imm_dic.utf8')
+    text_clean=tokenizer.clean(text)
+    print(tokenizer.cut(text_clean))
+
+main()
