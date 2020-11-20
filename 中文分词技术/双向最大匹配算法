@@ -1,0 +1,133 @@
+import re
+from string import punctuation
+    
+# 定义要删除的标点等字符
+add_punc='，。、【 】 “”：；（）《》‘’{}？！⑦()、%^>℃：.”“^-——=&#@￥'
+all_punc=punctuation+add_punc
+
+#向最大匹配
+class IMM(object):
+    def __init__(self, dic_path,stop_words_dic_path):
+        """
+        Parameters
+        ----------
+        dic_path : 存放字典位置
+        -------
+        将字典文件中的词读入dictionary.
+
+        """
+        self.dictionary = set()
+        self.stop_words_dic = set()
+        self.window_size = 0
+        #读取词典
+        with open(dic_path, 'r', encoding='utf8') as f:
+            for line in f:
+                line = line.strip()
+                #跳出本次循环，避免空行进入字典
+                if not line:
+                    continue
+                self.dictionary.add(line)
+                if len(line) > self.window_size:
+                    self.window_size = len(line)
+        #读取停用词词典
+        with open(stop_words_dic_path, 'r', encoding='utf8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                self.stop_words_dic.add(line)
+                    
+    def clean(self,text):
+        text_clean=''
+        for i in text:
+            #移除英文和数字
+            i_clean=re.sub(r'[A-Za-z0-9]|/d+','',i)
+            #移除标点符号
+            if i_clean in all_punc:
+                i_clean=''
+            if len(i_clean)>0:
+                text_clean=text_clean+i_clean       
+        return text_clean
+    
+    def FMM(self, text):
+        #从此位置查询window_size个字
+        index=0
+        result=[]
+        while index<len(text):
+            word=None
+            for size in range(index+self.window_size,index,-1):
+                piece=text[index:size]
+                if piece in self.stop_words_dic:
+                    word=''
+                    break
+                if piece in self.dictionary:
+                    word=piece
+                    result.append(piece)
+                    break
+            #如果词在字典中不存在
+            if word is None:
+                index+=1
+            #词在字典中存在，指针往后挪词长度以后
+            else:
+                index=size
+        return result
+    
+    def BMM(self, text):
+        result = []
+        index = len(text)
+        while index > 0:
+            #避免因为某个词在词典中找不到while陷入死循环
+            word = None
+            for size in range(self.window_size, 0, -1):
+                #跳出本次循环，避免因为index - size < 0而导致piece是空值消耗计算
+                if index - size < 0:
+                    continue
+                piece = text[(index - size):index]
+                if piece in self.dictionary:
+                    word = piece
+                    result.append(word)
+                    index -= size
+                    break
+            if word is None:
+                index -= 1
+        return result[::-1]
+
+def main():
+    text = "算法<dsf南京市1长江?.大桥"
+    
+    tokenizer = IMM('D:/笔记/NLP/learning-nlp-master(book)/chapter-3/data/imm_dic.utf8','D:/笔记/NLP/learning-nlp-master(book)/chapter-3/data/stop_words.utf8')
+    text_clean=tokenizer.clean(text)
+    a=tokenizer.FMM(text_clean)
+    a.sort()
+    b=tokenizer.BMM(text_clean)
+    b.sort()
+     
+    #1、如果前向最大匹配算法分词结果和后向相同，返回任一结果
+    if a == b:
+        print(a)
+    #2.1、如果分词结果不同，取分词次数较少的分词方法
+    lena = len(a)
+    lenb = len(b)
+    if lena > lenb:
+        print(b)
+    if lena < lenb: 
+        print(a) 
+    #2.2、如果前向最大匹配算法分词结果和后向不同，但分词次数相同，返回单词长度较小的分词方法
+    count1 = 0
+    count2 = 0
+    
+    if lena == lenb:
+        for DY1 in a:
+            if len(DY1) == 5:
+                count1 = count1 + 1
+        for DY2 in b:
+            if len(DY2) == 5:
+                count2 = count2 + 1
+        if count1 > count2:
+            print(b)
+        else:
+            print(a)
+
+main()
+
+ 
