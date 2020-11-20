@@ -73,7 +73,7 @@ class IMM(object):
         return result
 
 def main():
-    text = "算法<dsf南京市1长江?.大桥"
+    text = "算法f南京市1长江?.大桥"
     tokenizer = IMM('./data/imm_dic.utf8','./data/stop_words.utf8')
     text_clean=tokenizer.clean(text)
     print(tokenizer.cut(text_clean))
