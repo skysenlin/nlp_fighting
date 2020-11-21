@@ -1,0 +1,32 @@
+import codecs
+import thulac
+
+#直接实现编码转换
+def ReadFile(filePath,encoding="utf-8"):
+    with codecs.open(filePath,"r",encoding) as f:
+        return f.read()
+def WriteFile(filePath,content,encoding="gbk"):
+    with codecs.open(filePath,"w",encoding) as f:
+        f.write(content)
+def UTF8_to_GBK(src,dst):
+    content = ReadFile(src,encoding="utf-8")
+    WriteFile(dst,content,encoding="gbk")
+
+text_origin_1='这个把手该换了，我不喜欢日本和服，别把手放在我的肩膀上，工信处女干事每月经过下属科室都要亲口交代24口交换机等技术性器件的安装工作'
+text_origin_2='我爱北京天安门'
+# thu1 = thulac.thulac()  #默认模式
+thu1 = thulac.thulac(seg_only=True)  #只进行分词，不进行词性标注
+text_1 = thu1.cut(text_origin_1)
+text_2 = thu1.cut(text_origin_2, text=True)  #进行一句话分词
+print(text_1)# [['这个', ''], ['把手', ''], ['该', '']....
+print(text_2)# 我_r 爱_v 北京_ns 天安门_ns
+print([seg[0] for seg in text_1])
+
+#2文件分词,支持gbk(必须要转换，否则报错)
+thu1_f= thulac.thulac()
+UTF8_to_GBK("input.txt","input2.txt")
+UTF8_to_GBK("output.txt","output2.txt")
+thu1_f.cut_f("input2.txt","output2.txt")
+# thu1 = thulac.thulac(seg_only=True)  #只进行分词，不进行词性标注
+# thu1.cut_f("input.txt", "output.txt")  #对input.txt文件内容进行分词，输出到output.txt
+print("文件分词成功")
