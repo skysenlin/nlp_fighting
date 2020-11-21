@@ -91,43 +91,52 @@ class IMM(object):
             if word is None:
                 index -= 1
         return result[::-1]
+    
+    def FMM_BMM_compare(self,text):
+        """双向最大匹配算法是对前向最大匹配算法和后向最大匹配算法的结果进行比较，从而给出正确的分词方法。
+            步骤如下：
+            1、如果分词结果一样，任取一种结果；
+            2、分词结果不一样，如果分词数量不一样，取较少词数的分词方法
+            如果分词数量也一样，取最长单词字数较少的分词方法
+            如果分词数量一样并且字数也一样，任取一种方法"""
+        text_clean=self.clean(text)
+        a=self.FMM(text_clean)
+        a.sort()
+        b=self.BMM(text_clean)
+        b.sort()
+         
+        #1、如果前向最大匹配算法分词结果和后向相同，返回任一结果
+        if a == b:
+            return a
+        #2.1、如果分词结果不同，取分词次数较少的分词方法
+        lena = len(a)
+        lenb = len(b)
+        if lena > lenb:
+            return b
+        if lena < lenb: 
+            return a 
+        #2.2、如果前向最大匹配算法分词结果和后向不同，但分词次数相同，返回单词长度较小的分词方法
+        count1 = 0
+        count2 = 0
+        
+        if lena == lenb:
+            for DY1 in a:
+                if len(DY1) == 5:
+                    count1 = count1 + 1
+            for DY2 in b:
+                if len(DY2) == 5:
+                    count2 = count2 + 1
+            if count1 > count2:
+                return b
+            else:
+                return a
 
 def main():
     text = "算法<dsf南京市1长江?.大桥"
-    
-    tokenizer = IMM('D:/笔记/NLP/learning-nlp-master(book)/chapter-3/data/imm_dic.utf8','D:/笔记/NLP/learning-nlp-master(book)/chapter-3/data/stop_words.utf8')
-    text_clean=tokenizer.clean(text)
-    a=tokenizer.FMM(text_clean)
-    a.sort()
-    b=tokenizer.BMM(text_clean)
-    b.sort()
-     
-    #1、如果前向最大匹配算法分词结果和后向相同，返回任一结果
-    if a == b:
-        print(a)
-    #2.1、如果分词结果不同，取分词次数较少的分词方法
-    lena = len(a)
-    lenb = len(b)
-    if lena > lenb:
-        print(b)
-    if lena < lenb: 
-        print(a) 
-    #2.2、如果前向最大匹配算法分词结果和后向不同，但分词次数相同，返回单词长度较小的分词方法
-    count1 = 0
-    count2 = 0
-    
-    if lena == lenb:
-        for DY1 in a:
-            if len(DY1) == 5:
-                count1 = count1 + 1
-        for DY2 in b:
-            if len(DY2) == 5:
-                count2 = count2 + 1
-        if count1 > count2:
-            print(b)
-        else:
-            print(a)
+    # text="推特:美国总统账户将转给拜登"
+    tokenizer = IMM('./data/imm_dic.utf8','./data/stop_words.utf8')
+    text_cut=tokenizer.FMM_BMM_compare(text)
+    print(text_cut)
+
 
 main()
-
- 
