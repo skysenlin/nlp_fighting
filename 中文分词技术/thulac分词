@@ -1,6 +1,11 @@
 import codecs
 import thulac
-
+"""
+thulac特点：
+能力强。利用我们集成的目前世界上规模最大的人工分词和词性标注中文语料库（约含5800万字）训练而成，模型标注能力强大。
+准确率高。该工具包在标准数据集Chinese Treebank（CTB5）上分词的F1值可达97.3％，词性标注的F1值可达到92.9％，与该数据集上最好方法效果相当。
+速度较快。同时进行分词和词性标注速度为300KB/s，每秒可处理约15万字。只进行分词速度可达到1.3MB/s。
+"""
 #直接实现编码转换
 def ReadFile(filePath,encoding="utf-8"):
     with codecs.open(filePath,"r",encoding) as f:
